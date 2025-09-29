@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Billboard Weather App</title>
+    <title>Calgary Weather - Digital Billboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -151,122 +151,17 @@
         }
 
         .forecast-day__icon {
-            width: 64px;
-            height: 56px;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .forecast-day__icon .sun {
-            top: 0;
-            left: 50%;
-            width: 34px;
-            height: 34px;
-            margin-left: -17px;
-            border-radius: 50%;
-            background: #ffd36a;
-            box-shadow: 0 0 16px rgba(255, 211, 106, 0.55);
-        }
-
-        .forecast-day__icon .moon {
-            top: 6px;
-            left: 50%;
-            width: 28px;
-            height: 28px;
-            margin-left: -14px;
-            border-radius: 50%;
-            background: #ffd36a;
-            box-shadow: inset -8px -6px 0 rgba(255, 211, 106, 0.35);
-        }
-
-        .forecast-day__icon .moon::after {
-            content: "";
-            position: absolute;
-            inset: 18% 12% 12% 32%;
-            background: rgba(255, 255, 255, 0.18);
-            border-radius: 50%;
-        }
-
-        .forecast-day__icon .cloud--one {
-            bottom: 0;
-            left: 50%;
-            width: 58px;
-            height: 32px;
-            margin-left: -29px;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.92);
-            box-shadow: -20px 0 0 rgba(255, 255, 255, 0.92);
-        }
-
-        .forecast-day__icon .cloud--two {
-            bottom: 6px;
-            left: 18px;
-            width: 38px;
-            height: 24px;
-            border-radius: 34px;
-            background: rgba(255, 255, 255, 0.85);
-        }
-
-        .forecast-day__icon .rain {
-            bottom: -12px;
-            left: 26px;
-            width: 6px;
-            height: 20px;
-            border-radius: 4px;
-            background: rgba(158, 230, 255, 0.85);
-            box-shadow: 10px 0 0 rgba(158, 230, 255, 0.6), 20px 0 0 rgba(158, 230, 255, 0.45);
-        }
-
-        .forecast-day__icon .snow {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
-        }
-
-        .forecast-day__icon .snow--one {
-            bottom: -8px;
-            left: 24px;
-        }
-
-        .forecast-day__icon .snow--two {
-            bottom: -10px;
-            left: 44px;
-        }
-
-        .forecast-day__icon .bolt {
-            bottom: -2px;
-            left: 30px;
-            width: 12px;
-            height: 28px;
-            background: linear-gradient(180deg, #ffd36a 0%, #ffb347 100%);
-            clip-path: polygon(40% 0, 100% 0, 58% 52%, 96% 52%, 0 100%, 34% 46%);
-            filter: drop-shadow(0 6px 10px rgba(255, 179, 71, 0.45));
-        }
-
-        .forecast-day__icon .star {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.85);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .forecast-day__icon .star::after {
-            content: "";
-            position: absolute;
-            inset: -5px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(255, 255, 255, 0.35);
-        }
-
-        .forecast-day__icon .star--one {
-            top: 4px;
-            left: 8px;
-        }
-
-        .forecast-day__icon .star--two {
-            top: 14px;
-            left: 46px;
+        .forecast-day__icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .forecast-day__high {
@@ -319,17 +214,8 @@
                     <p class="location" id="location">Calgary, Alberta</p>
                     <p class="date" id="date">Loading weather data...</p>
                 </div>
-                <div class="current-weather__icon icon icon--partly-day" aria-hidden="true" id="currentIcon">
-                    <div class="sun"></div>
-                    <div class="moon"></div>
-                    <div class="cloud cloud--one"></div>
-                    <div class="cloud cloud--two"></div>
-                    <div class="rain"></div>
-                    <div class="snow snow--one"></div>
-                    <div class="snow snow--two"></div>
-                    <div class="bolt"></div>
-                    <div class="star star--one"></div>
-                    <div class="star star--two"></div>
+                <div class="current-weather__icon" aria-hidden="true" id="currentIcon">
+                    <img id="currentIconImg" src="" alt="Weather icon">
                 </div>
             </header>
             <div class="current-weather__details">
@@ -361,6 +247,7 @@
             condition: document.getElementById('condition'),
             feels: document.getElementById('feels'),
             currentIcon: document.getElementById('currentIcon'),
+            currentIconImg: document.getElementById('currentIconImg'),
             forecast: document.getElementById('forecast'),
             forecastStatus: document.getElementById('forecastStatus'),
             lastUpdated: document.getElementById('lastUpdated')
@@ -373,25 +260,11 @@
                 .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
                 .join(' ');
 
-        const setIconVariant = (element, variant) => {
-            if (!element) return;
-            element.className = `current-weather__icon icon icon--${variant}`;
-        };
-
-        const setForecastIconVariant = (element, variant) => {
-            if (!element) return;
-            element.className = `forecast-day__icon icon icon--${variant}`;
-        };
-
-        const getIconVariant = (conditionId, isNight = false) => {
-            if (conditionId >= 200 && conditionId < 300) return 'thunder';
-            if (conditionId >= 300 && conditionId < 600) return 'rain';
-            if (conditionId >= 600 && conditionId < 700) return 'snow';
-            if (conditionId >= 700 && conditionId < 800) return 'cloudy';
-            if (conditionId === 800) return isNight ? 'clear-night' : 'clear-day';
-            if (conditionId === 801 || conditionId === 802) return isNight ? 'partly-night' : 'partly-day';
-            if (conditionId >= 803 && conditionId <= 804) return 'cloudy';
-            return 'cloudy';
+        const setIconVariant = (iconCode) => {
+            // OpenWeatherMap provides icon codes like "01d", "02n", "10d", etc.
+            // Use OpenWeatherMap's icon service
+            const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
+            selectors.currentIconImg.src = iconUrl;
         };
 
         const showError = (message) => {
@@ -432,7 +305,6 @@
         const updateCurrentWeather = (data) => {
             const timezoneOffset = data.timezone;
             const localDate = new Date((data.dt + timezoneOffset) * 1000);
-            const isNight = data.dt < data.sys.sunrise || data.dt > data.sys.sunset;
             const weather = data.weather[0];
 
             selectors.date.textContent = localDate.toLocaleDateString('en-US', {
@@ -446,8 +318,8 @@
             selectors.condition.classList.remove('error-state');
             selectors.feels.textContent = `Feels like ${formatTemperature(data.main.feels_like)}`;
 
-            const variant = getIconVariant(weather.id, isNight);
-            setIconVariant(selectors.currentIcon, variant);
+            // Use the icon code from the API
+            setIconVariant(weather.icon);
         };
 
         const buildForecastDays = (forecast) => {
@@ -518,21 +390,12 @@
                 dayElement.className = 'forecast-day';
 
                 const dayName = dayFormatter.format(day.date);
-                const variant = getIconVariant(day.condition.id, false);
+                const iconUrl = `https://openweathermap.org/img/wn/${day.condition.icon}@2x.png`;
 
                 dayElement.innerHTML = `
                     <h2 class="forecast-day__name">${dayName}</h2>
-                    <div class="forecast-day__icon icon icon--${variant}" aria-hidden="true">
-                        <div class="sun"></div>
-                        <div class="moon"></div>
-                        <div class="cloud cloud--one"></div>
-                        <div class="cloud cloud--two"></div>
-                        <div class="rain"></div>
-                        <div class="snow snow--one"></div>
-                        <div class="snow snow--two"></div>
-                        <div class="bolt"></div>
-                        <div class="star star--one"></div>
-                        <div class="star star--two"></div>
+                    <div class="forecast-day__icon" aria-hidden="true">
+                        <img src="${iconUrl}" alt="${day.condition.description}">
                     </div>
                     <p class="forecast-day__high">${formatTemperature(day.high)}</p>
                     <p class="forecast-day__low">${formatTemperature(day.low)}</p>
