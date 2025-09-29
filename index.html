@@ -48,6 +48,17 @@
             position: relative;
         }
 
+        .branding {
+            position: absolute;
+            top: clamp(24px, 3vw, 48px);
+            right: clamp(24px, 3vw, 48px);
+            font-size: clamp(0.85rem, 1.1vw, 1rem);
+            color: var(--text-secondary);
+            text-align: right;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
         .current-weather {
             display: grid;
             gap: 16px;
@@ -55,7 +66,7 @@
 
         .current-weather__header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: flex-start;
             gap: 24px;
         }
@@ -72,32 +83,32 @@
             color: var(--text-secondary);
         }
 
-        .current-weather__icon {
-            width: clamp(120px, 16vw, 180px);
-            height: clamp(120px, 16vw, 180px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .current-weather__icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-        }
-
         .current-weather__details {
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            gap: clamp(24px, 4vw, 48px);
+            gap: clamp(20px, 3vw, 40px);
         }
 
         .temperature {
             font-size: clamp(4rem, 8vw, 6.5rem);
             font-weight: 600;
             margin: 0;
+        }
+
+        .current-weather__icon {
+            width: clamp(100px, 12vw, 140px);
+            height: clamp(100px, 12vw, 140px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .current-weather__icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .summary {
@@ -181,16 +192,6 @@
             color: #ff6b6b;
         }
 
-        .branding {
-            position: absolute;
-            top: clamp(20px, 3vw, 40px);
-            right: clamp(20px, 3vw, 40px);
-            font-size: clamp(0.9rem, 1.2vw, 1.1rem);
-            color: var(--text-secondary);
-            text-align: right;
-            font-weight: 500;
-        }
-
         @media (max-width: 768px) {
             .current-weather__header {
                 align-items: flex-start;
@@ -210,18 +211,20 @@
 </head>
 <body>
     <main class="weather-app">
+        <div class="branding">Brought to you by<br>Bow Valley College</div>
+        
         <section class="current-weather" aria-live="polite">
             <header class="current-weather__header">
                 <div>
                     <p class="location" id="location">Calgary, Alberta</p>
                     <p class="date" id="date">Loading weather data...</p>
                 </div>
-                <div class="current-weather__icon" aria-hidden="true" id="currentIcon">
-                    <img id="currentIconImg" src="" alt="Weather icon">
-                </div>
             </header>
             <div class="current-weather__details">
                 <div class="temperature" id="temperature">--°</div>
+                <div class="current-weather__icon" aria-hidden="true">
+                    <img id="currentIconImg" src="" alt="Weather icon">
+                </div>
                 <div class="summary">
                     <p class="summary__condition" id="condition">Loading current conditions...</p>
                     <p class="summary__feels" id="feels">Feels like --°</p>
@@ -233,8 +236,6 @@
             <p class="status-message" id="forecastStatus" hidden>Loading 3-day forecast...</p>
             <div class="forecast" id="forecast"></div>
         </section>
-        
-        <div class="last-updated" id="lastUpdated"></div>
     </main>
 
     <script>
@@ -248,11 +249,9 @@
             temperature: document.getElementById('temperature'),
             condition: document.getElementById('condition'),
             feels: document.getElementById('feels'),
-            currentIcon: document.getElementById('currentIcon'),
             currentIconImg: document.getElementById('currentIconImg'),
             forecast: document.getElementById('forecast'),
-            forecastStatus: document.getElementById('forecastStatus'),
-            lastUpdated: document.getElementById('lastUpdated')
+            forecastStatus: document.getElementById('forecastStatus')
         };
 
         const formatTemperature = (value) => `${Math.round(value)}°`;
@@ -262,11 +261,34 @@
                 .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
                 .join(' ');
 
+        const getLocalIconPath = (iconCode) => {
+            const iconMap = {
+                '01d': 'day-clear-sky.svg',
+                '01n': 'night-clear-sky.svg',
+                '02d': 'day-few-clouds.svg',
+                '02n': 'night-few-clouds.svg',
+                '03d': 'day-scattered-clouds.svg',
+                '03n': 'day-scattered-clouds.svg',
+                '04d': 'day-broken-clouds.svg',
+                '04n': 'day-broken-clouds.svg',
+                '09d': 'day-shower-rain.svg',
+                '09n': 'night-rain.svg',
+                '10d': 'day-rain.svg',
+                '10n': 'night-rain.svg',
+                '11d': 'day-thunderstorm.svg',
+                '11n': 'day-thunderstorm.svg',
+                '13d': 'night-snow.svg',
+                '13n': 'night-snow.svg',
+                '50d': 'night-mist.svg',
+                '50n': 'night-mist.svg'
+            };
+            
+            return `icons/${iconMap[iconCode] || 'day-clear-sky.svg'}`;
+        };
+
         const setIconVariant = (iconCode) => {
-            // OpenWeatherMap provides icon codes like "01d", "02n", "10d", etc.
-            // Use OpenWeatherMap's icon service
-            const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@4x.png`;
-            selectors.currentIconImg.src = iconUrl;
+            const iconPath = getLocalIconPath(iconCode);
+            selectors.currentIconImg.src = iconPath;
         };
 
         const showError = (message) => {
@@ -320,7 +342,6 @@
             selectors.condition.classList.remove('error-state');
             selectors.feels.textContent = `Feels like ${formatTemperature(data.main.feels_like)}`;
 
-            // Use the icon code from the API
             setIconVariant(weather.icon);
         };
 
@@ -350,7 +371,7 @@
 
             return Array.from(grouped.values())
                 .sort((a, b) => a.date.getTime() - b.date.getTime())
-                .slice(1, 4) // Skip today, get next 3 days
+                .slice(1, 4)
                 .map((group) => {
                     const bestSample = group.samples.reduce((selected, candidate) => {
                         const candidateHour = candidate.localDate.getUTCHours();
@@ -392,12 +413,12 @@
                 dayElement.className = 'forecast-day';
 
                 const dayName = dayFormatter.format(day.date);
-                const iconUrl = `https://openweathermap.org/img/wn/${day.condition.icon}@2x.png`;
+                const iconPath = getLocalIconPath(day.condition.icon);
 
                 dayElement.innerHTML = `
                     <h2 class="forecast-day__name">${dayName}</h2>
                     <div class="forecast-day__icon" aria-hidden="true">
-                        <img src="${iconUrl}" alt="${day.condition.description}">
+                        <img src="${iconPath}" alt="${day.condition.description}">
                     </div>
                     <p class="forecast-day__high">${formatTemperature(day.high)}</p>
                     <p class="forecast-day__low">${formatTemperature(day.low)}</p>
@@ -411,25 +432,13 @@
             });
         };
 
-        const updateLastUpdated = () => {
-            const now = new Date();
-            selectors.lastUpdated.textContent = `Last updated: ${now.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit'
-            })}`;
-        };
-
         const loadWeather = async () => {
             try {
                 console.log('Loading weather data for Calgary...');
-                console.log('API Key (first 10 chars):', API_KEY.substring(0, 10) + '...');
                 
-                // Try direct API call first
-                let currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${CALGARY_LAT}&lon=${CALGARY_LON}&units=metric&appid=${API_KEY}`;
-                let forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${CALGARY_LAT}&lon=${CALGARY_LON}&units=metric&appid=${API_KEY}`;
+                const currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${CALGARY_LAT}&lon=${CALGARY_LON}&units=metric&appid=${API_KEY}`;
+                const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${CALGARY_LAT}&lon=${CALGARY_LON}&units=metric&appid=${API_KEY}`;
 
-                console.log('Making API requests...');
-                
                 try {
                     const [current, forecast] = await Promise.all([
                         fetchJson(currentUrl),
@@ -439,24 +448,21 @@
                     console.log('Weather data loaded successfully');
                     updateCurrentWeather(current);
                     renderForecast(buildForecastDays(forecast));
-                    updateLastUpdated();
                 } catch (directError) {
-                    // If direct call fails due to CORS, try with proxy
                     if (directError.message.includes('Network error')) {
                         console.log('Direct API call failed, trying with CORS proxy...');
                         const proxy = 'https://corsproxy.io/?';
-                        currentUrl = proxy + encodeURIComponent(`https://api.openweathermap.org/data/2.5/weather?lat=${CALGARY_LAT}&lon=${CALGARY_LON}&units=metric&appid=${API_KEY}`);
-                        forecastUrl = proxy + encodeURIComponent(`https://api.openweathermap.org/data/2.5/forecast?lat=${CALGARY_LAT}&lon=${CALGARY_LON}&units=metric&appid=${API_KEY}`);
+                        const proxiedCurrentUrl = proxy + encodeURIComponent(currentUrl);
+                        const proxiedForecastUrl = proxy + encodeURIComponent(forecastUrl);
                         
                         const [current, forecast] = await Promise.all([
-                            fetchJson(currentUrl),
-                            fetchJson(forecastUrl)
+                            fetchJson(proxiedCurrentUrl),
+                            fetchJson(proxiedForecastUrl)
                         ]);
                         
                         console.log('Weather data loaded successfully via proxy');
                         updateCurrentWeather(current);
                         renderForecast(buildForecastDays(forecast));
-                        updateLastUpdated();
                     } else {
                         throw directError;
                     }
@@ -467,10 +473,7 @@
             }
         };
 
-        // Initial load
         loadWeather();
-
-        // Update every 10 minutes for digital billboard
         setInterval(loadWeather, 10 * 60 * 1000);
     </script>
 </body>
